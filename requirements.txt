@@ -1,0 +1,4 @@
+requests
+schedule
+slack_sdk
+apscheduler
