@@ -1,6 +1,8 @@
 # langchain Daily Progress - 2025-04-17
 
 ## Issues
+- text-splitters: Set strict mypy rules (open)
+- community: fix cost calculations for 4.1 and o4 in OpenAI callback (open)
 - OpenAICallbackHandler does not have cost information for Open AI 4.1 and o4 models (open)
 - Deprecate HanaDB, HanaTranslator and update example notebook to use new implementation  (open)
 - langchain[lint]: fix mypy type ignores (open)
@@ -29,10 +31,10 @@
 - ChatTongyi has the with_stuctured_output method, but it is always None (open)
 - Scope Error while trying to use Anthropic Model with GoogleVertex library. (open)
 - Remote malicious email injection which leads to control of the agent and forward the user's email (open)
-- community: Strip URLs from sitemap. (open)
-- SitemapLoader URLs are not properly strippe (open)
 
 ## Pull Requests
+- text-splitters: Set strict mypy rules (open)
+- community: fix cost calculations for 4.1 and o4 in OpenAI callback (open)
 - Deprecate HanaDB, HanaTranslator and update example notebook to use new implementation  (open)
 - langchain[lint]: fix mypy type ignores (open)
 - core: Raise `AttributeError` (not `ModuleNotFoundError`) from`__getattr__` (open)
@@ -61,8 +63,6 @@
 - Removing `dereference_refs` from `_convert_json_schema_to_openai_function` (open)
 - langchain-openai: support custom fallback content for tool-only messages (open)
 - Improvements to `ChatPerplexity` Integration  (open)
-- core: Cleanup Pydantic models and handle deprecation warnings (open)
-- Add Compass Labs toolkits to langchain docs (open)
 
 ## Commits
 - doc: clean doc word description. (#30895)

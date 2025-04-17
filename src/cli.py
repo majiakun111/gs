@@ -47,7 +47,7 @@ class CLI:
 
     def export_daily_progress(self):
         """从所有订阅仓库获取更新"""
-        self._process_repositories(
+        self.process_repositories(
             lambda owner, repo: self.github_client.export_daily_progress(owner, repo)
         )
 
@@ -57,7 +57,7 @@ class CLI:
             markdown_file = self.github_client.export_daily_progress(owner, repo)
             self.report_generator.generate_daily_report(markdown_file)
 
-        self._process_repositories(process)
+        self.process_repositories(process)
         
     def show_help(self):
         print("Commands:")
