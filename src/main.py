@@ -1,103 +1,84 @@
-import argparse
+import os
+import sys
 import threading
 import time
-from api.github_api import GitHubAPI
-from subscriptions.subscription_manager import SubscriptionManager
-from notifications.notifier import Notifier
-from reports.report_generator import ReportGenerator
 import schedule
+from subscription_manager import SubscriptionManager
+from github_client import GitHubClient
+from report_generator import ReportGenerator
+from llm import LLM
+from cli import CLI
+
+from notifier import Notifier
 
 class GitHubSentinel:
     def __init__(self):
-        self.github_api = GitHubAPI(token="your_github_api_token")
-        self.subscription_manager = SubscriptionManager()
-        self.notifier = Notifier(email_host="smtp.gmail.com", email_port=465, sender_email="your_email@gmail.com", sender_password="your_email_password")
-        self.report_generator = ReportGenerator()
+        subscription_manager = SubscriptionManager()
 
-    def fetch_and_generate_report(self, repo_url=None):
-        """获取更新并生成报告"""
-        repo_url = repo_url or self.subscription_manager.get_subscriptions()
-        updates_by_repo = {}
+        github_token = os.getenv('GITHUB_TOKEN')
+        if not github_token:
+            raise ValueError("GITHUB_TOKEN environment variable is not set")
+        github_client = GitHubClient(token=github_token)
 
-        for repo_url in repo_url:
-            owner, repo = repo_url.split('/')[-2], repo_url.split('/')[-1]
-            updates = self.github_api.get_repo_updates(owner, repo)
-            updates_by_repo[repo] = updates
+        llm = LLM()
+        report_generator = ReportGenerator(llm)
 
-        # 生成报告
-        report = self.report_generator.generate_daily_report(updates_by_repo)
-        print("Generated Report:")
-        for item in report:
-            print(f"Repo: {item['repo_name']}")
-            print(f"Date: {item['date']}")
-            print(f"Updates: {item['updates']}")
-
-        # 发送通知
-        self.notifier.send_email_notification("recipient@example.com", "GitHub Updates Report", str(updates_by_repo))
+        self.cli = CLI(subscription_manager, github_client, report_generator)
+       
+        self.notifier = Notifier(
+            email_host="smtp.gmail.com",
+            email_port=465,
+            sender_email="your_email@gmail.com",
+            sender_password="your_email_password"
+        )
 
     def scheduler_task(self):
-        """定时任务在后台运行"""
-        schedule.every().day.at("09:00").do(self.fetch_and_generate_report)
+        """定时任务在后台运行，包含异常处理。"""
+        # 设定每日 09:00 执行 fetch_updates
+        schedule.every().day.at("09:00").do(self.cli.fetch_updates)
+
+        print("Scheduler started. Waiting for scheduled jobs...")
+
         while True:
-            schedule.run_pending()
+            try:
+                # 检查并运行所有到期的任务
+                schedule.run_pending()
+            except Exception as e:
+                # 捕获并打印任务执行中的异常，防止调度器线程退出
+                print(f"Error during scheduled task execution: {str(e)}")
+                # 可以选择添加更详细的日志记录
+                # logger.exception("Error during scheduled task execution")
+            
+            # 短暂休眠，避免 CPU 占用过高
+            # 这是 schedule 库推荐的标准模式
             time.sleep(1)
 
-    def add_subscription(self, repo_url):
-        """增加订阅"""
-        self.subscription_manager.add_subscription(repo_url)
-        print(f"Added subscription: {repo_url}")
-
-    def remove_subscription(self, repo_url):
-        """删除订阅"""
-        self.subscription_manager.remove_subscription(repo_url)
-        print(f"Removed subscription: {repo_url}")
-
-    def show_subscriptions(self):
-        """显示当前订阅的仓库"""
-        subscriptions = self.subscription_manager.get_subscriptions()
-        print("Current subscriptions:")
-        for repo in subscriptions:
-            print(repo)
-
-    def run(self):
-        """启动调度任务并进入命令行工具"""
-        scheduler_thread = threading.Thread(target=self.scheduler_task, daemon=True)
-        scheduler_thread.start()
-
-        # 进入命令行工具
+    def interactive_cli(self):
+        self.cli.show_help();
         while True:
-            command = input("\nGitHub Sentinel Command > ").strip().split()
-
-            if len(command) == 0:
-                continue
-
-            cmd = command[0]
-
-            if cmd == "status":
-                self.show_subscriptions()
-
-            elif cmd == "add":
-                if len(command) != 2:
-                    print("Usage: add <repo_url>")
-                else:
-                    self.add_subscription(command[1])
-
-            elif cmd == "remove":
-                if len(command) != 2:
-                    print("Usage: remove <repo_url>")
-                else:
-                    self.remove_subscription(command[1])
-
-            elif cmd == "fetch":
-                self.fetch_and_generate_report()
-
-            elif cmd == "exit":
-                print("Exiting...")
+            command = input("Enter a command: ").strip().lower()
+            if not self.cli.handle_command(command):
                 break
 
-            else:
-                print(f"Unknown command: {cmd}. Type 'help' for usage.")
+def main():
+    try:
+        sentinel = GitHubSentinel()
+        
+        # 启动调度器任务线程
+        scheduler_thread = threading.Thread(
+            target=sentinel.scheduler_task,
+            daemon=True
+        )
+        scheduler_thread.start()
+        
+        # 启动交互式命令行工具
+        sentinel.interactive_cli()
+    except Exception as e:
+        print(f"Fatal error: {str(e)}")
+        sys.exit(1)
+
 
 if __name__ == "__main__":
-    sentinel = GitHubSentinel()
-    sentinel.run()
+    main()
+
+    
