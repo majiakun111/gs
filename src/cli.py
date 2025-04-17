@@ -46,47 +46,25 @@ class CLI:
 
 
     def export_daily_progress(self):
-        """从所有订阅仓库获取更新并生成报告"""
-        subscriptions = self.subscription_manager.get_subscriptions()
-        if not subscriptions:
-            print("No repositories subscribed yet.")
-            return
-
-        for repo in subscriptions:
-            try:
-                owner, repo = repo.split('/')
-                print(f"Fetching updates for {repo}...")
-                self.github_client.export_daily_progress(owner, repo);
-                print(f"Report generated for {repo}")
-            except ValueError:
-                print(f"Invalid repository format: {repo}. Expected format: owner/repo")
-            except Exception as e:
-                print(f"Error processing repository {repo}: {str(e)}")
+        """从所有订阅仓库获取更新"""
+        self._process_repositories(
+            lambda owner, repo: self.github_client.export_daily_progress(owner, repo)
+        )
 
     def daily_progress_and_report(self):
         """从所有订阅仓库获取更新并生成报告"""
-        subscriptions = self.subscription_manager.get_subscriptions()
-        if not subscriptions:
-            print("No repositories subscribed yet.")
-            return
+        def process(owner, repo):
+            markdown_file = self.github_client.export_daily_progress(owner, repo)
+            self.report_generator.generate_daily_report(markdown_file)
 
-        for repo in subscriptions:
-            try:
-                owner, repo = repo.split('/')
-                print(f"Fetching updates for {repo}...")
-                markdown_file_path =  self.github_client.export_daily_progress(owner, repo);
-                self.report_generator.generate_daily_report(markdown_file_path)
-                print(f"Report generated for {repo}")
-            except ValueError:
-                print(f"Invalid repository format: {repo}. Expected format: owner/repo")
-            except Exception as e:
-                print(f"Error processing repository {repo}: {str(e)}")
+        self._process_repositories(process)
         
     def show_help(self):
         print("Commands:")
         print("  add <repo>       - Add a subscription for the repo")
         print("  remove <repo>    - Remove a subscription for the repo")
         print("  list             - List all subscriptions")
+        print("  export           - Fetch updates and generate daily report for all subscribed repositories")
         print("  generate         - Fetch updates and generate daily report for all subscribed repositories")
         print("  exit/quit        - Exit the tool")
 
@@ -107,6 +85,9 @@ class CLI:
         
         elif command == "list":
             self.list_subscriptions()
+
+        elif command == "export":
+            self.daily_progress_and_report()
         
         elif command == "generate":
             self.export_daily_progress()

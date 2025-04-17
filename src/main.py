@@ -33,12 +33,8 @@ class GitHubSentinel:
         )
 
     def scheduler_task(self):
-        """定时任务在后台运行，包含异常处理。"""
-        # 设定每日 09:00 执行 fetch_updates
-        schedule.every().day.at("09:00").do(self.cli.fetch_updates)
-
-        print("Scheduler started. Waiting for scheduled jobs...")
-
+        """定时任务在后台运行"""
+        schedule.every().day.at("09:00").do(self.cli.daily_progress_and_report)
         while True:
             try:
                 # 检查并运行所有到期的任务

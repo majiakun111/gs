@@ -1,8 +1,9 @@
 # langchain Daily Progress - 2025-04-17
 
 ## Issues
-- doc: clean doc word description. (open)
-- langchain: fix mypy type ignores (open)
+- OpenAICallbackHandler does not have cost information for Open AI 4.1 and o4 models (open)
+- Deprecate HanaDB, HanaTranslator and update example notebook to use new implementation  (open)
+- langchain[lint]: fix mypy type ignores (open)
 - core: Raise `AttributeError` (not `ModuleNotFoundError`) from`__getattr__` (open)
 - opensearch: create standalone langchain-opensearch package (open)
 - langchain-openai: Fix openapi _resize case. (open)
@@ -30,11 +31,10 @@
 - Remote malicious email injection which leads to control of the agent and forward the user's email (open)
 - community: Strip URLs from sitemap. (open)
 - SitemapLoader URLs are not properly strippe (open)
-- langchain: catch if there are only system messages in a prompt for anthropic (open)
 
 ## Pull Requests
-- doc: clean doc word description. (open)
-- langchain: fix mypy type ignores (open)
+- Deprecate HanaDB, HanaTranslator and update example notebook to use new implementation  (open)
+- langchain[lint]: fix mypy type ignores (open)
 - core: Raise `AttributeError` (not `ModuleNotFoundError`) from`__getattr__` (open)
 - opensearch: create standalone langchain-opensearch package (open)
 - langchain-openai: Fix openapi _resize case. (open)
@@ -65,6 +65,12 @@
 - Add Compass Labs toolkits to langchain docs (open)
 
 ## Commits
+- doc: clean doc word description. (#30895)
+
+Signed-off-by: zhanluxianshen <zhanluxianshen@163.com> by 湛露先生
+- partners:  bug fix check_imports.py exit code. (#30897)
+
+Signed-off-by: zhanluxianshen <zhanluxianshen@163.com> by 湛露先生
 - docs: update Bedrock chat model page (#30883)
 
 - document prompt caching
@@ -350,11 +356,3 @@ Dependencies: tableau-langchain
 ---------
 
 Co-authored-by: Joe Constantino <joe.constantino@joecons-ltm6v86.internal.salesforce.com> by Joey Constantino
-- openai[patch]: update imports in test (#30828)
-
-Quick fix to unblock CI, will need to address in core separately. by ccurme
-- core[lint]: fix issue with unused ignore in `__init__.py` files (#30825)
-
-Fixing a race condition between
-https://github.com/langchain-ai/langchain/pull/30769 and
-https://github.com/langchain-ai/langchain/pull/30737 by Sydney Runkle

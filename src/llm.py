@@ -5,10 +5,10 @@ class LLM:
     def __init__(self):
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    //用LLM对Markdown提炼
+    #用LLM对Markdown提炼
     def generate_report(self, issues_prs_summary):
         """生成基于 issues 和 PRs 的正式报告"""
-        prompt = f"Please generate a formal project report based on the following issues and pull requests:\n\n{issues_prs_summary}"
+        prompt = f"以下是项目的最新进展,根据功能合并同类项,形成一份简报,至少包含: 1)新增功能; 2)主要改进; 3)修复问题; :\n\n{markdown_content}"
 
         try:
             response = openai.ChatCompletion.create(
