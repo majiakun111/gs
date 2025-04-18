@@ -10,12 +10,8 @@ class SubscriptionManager:
         # 3. 获取父目录 (即 src 目录) (e.g., .../your_project_root/src/)
         parent_dir = os.path.dirname(script_dir)
         # 4. 构建到父目录下 JSON 文件的完整路径
-        self.file_path = os.path.join(parent_dir, 'subscriptions.json')
-        print(f"尝试读取文件: {self.file_path}")
-       
+        self.file_path = os.path.join(parent_dir, 'subscriptions.json')       
         self.subscriptions = self.load_subscriptions()
-        print(f"尝试读取文件: {self.subscriptions}")
-
     
     def load_subscriptions(self):
         if os.path.exists(self.file_path):

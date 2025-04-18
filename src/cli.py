@@ -86,10 +86,10 @@ class CLI:
         elif command == "list":
             self.list_subscriptions()
 
-        elif command == "export":
+        elif command == "generate":
             self.daily_progress_and_report()
         
-        elif command == "generate":
+        elif command == "export":
             self.export_daily_progress()
         
         elif command == "help":
