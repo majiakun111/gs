@@ -1,4 +1,5 @@
 [
     "axios/axios",
-    "langchain-ai/langchain"
+    "langchain-ai/langchain",
+    "ollama/ollama"
 ]

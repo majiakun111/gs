@@ -21,8 +21,8 @@ class GitHubAPI:
             "Accept": "application/vnd.github.v3+json"
         }
     
-    def get_repo_updates(self, owner, repo):
-        url = f"{self.base_url}/repos/{owner}/{repo}/events"
+    def get_repo_updates(self, repo):
+        url = f"{self.base_url}/repos/{repo}/events"
         response = requests.get(url, headers=self.headers)
         response.raise_for_status()
         return response.json()
@@ -70,14 +70,14 @@ class SubscriptionManager:
             self.subscriptions.remove(repo_url)
             self.save_subscriptions()
     
-    def get_subscriptions(self):
+    def list_subscriptions(self):
         return self.subscriptions
 
 # 示例用法
 if __name__ == "__main__":
     manager = SubscriptionManager()
     manager.add_subscription("https://github.com/octocat/Hello-World")
-    print(manager.get_subscriptions())
+    print(manager.list_subscriptions())
 EOF
 
 # 3. 创建 通知系统代码
@@ -144,7 +144,7 @@ class ReportGenerator:
         }
         self.reports.append(report)
     
-    def generate_daily_report(self, updates_by_repo):
+    def generate_report(self, updates_by_repo):
         for repo_name, updates in updates_by_repo.items():
             self.generate_report(repo_name, updates)
         return self.reports
@@ -181,9 +181,9 @@ def fetch_and_notify():
     report_generator = ReportGenerator()
 
     # 获取订阅的仓库
-    for repo_url in subscription_manager.get_subscriptions():
-        owner, repo = repo_url.split('/')[-2], repo_url.split('/')[-1]
-        updates = github_api.get_repo_updates(owner, repo)
+    for repo_url in subscription_manager.list_subscriptions():
+        repo = repo_url.split('/')[-2], repo_url.split('/')[-1]
+        updates = github_api.get_repo_updates(repo)
         
         # 生成报告
         report_generator.generate_daily_report({repo: updates})

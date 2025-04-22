@@ -2,22 +2,24 @@ from openai import OpenAI
 import os
 
 class LLM:
-    def __init__(self):
+    def __init__(self, api_key):
         self.client = OpenAI(
-            api_key = "21912878364344545321", #模型工厂AppID
+            api_key = api_key, 
             base_url = "https://aigc.sankuai.com/v1/openai/native"
         )  
 
+        # 从TXT文件加载提示信息
+        with open("prompts/report_prompt.txt", "r", encoding='utf-8') as file:
+            self.system_prompt = file.read()
+
     #用LLM对Markdown提炼
     def generate_report(self, markdown_content):
-        prompt = f"以下是项目的最新进展,根据功能合并同类项,形成一份简报,至少包含: 1)新增功能; 2)主要改进; 3)修复问题; :\n\n{markdown_content}-------------------- \n\n并以中文输出"
-
         try:
             response = self.client.chat.completions.create(
                 model="gpt-4.1",
                 messages= [
-                    {"role": "system", "content": "You are a helpful assistant that generates formal project reports."},
-                    {"role": "user", "content": prompt},
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user", "content": markdown_content},
                 ],
                 stream=False,
                 extra_headers={

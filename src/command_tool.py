@@ -4,26 +4,23 @@ import threading
 import time
 import schedule
 from subscription_manager import SubscriptionManager
+from config import Config
 from github_client import GitHubClient
 from report_generator import ReportGenerator
 from llm import LLM
-from cli import CLI
+from command_handler import CommandHandler
 
 from notifier import Notifier
 
 class GitHubSentinel:
     def __init__(self):
-        subscription_manager = SubscriptionManager()
-
-        github_token = os.getenv('GITHUB_TOKEN')
-        if not github_token:
-            raise ValueError("GITHUB_TOKEN environment variable is not set")
-        github_client = GitHubClient(token=github_token)
-
-        llm = LLM()
+        config = Config();
+        github_client = GitHubClient(token=config.github_token)
+        llm = LLM(config.openai_api_key)
         report_generator = ReportGenerator(llm)
+        subscription_manager = SubscriptionManager(config.subscriptions_file)
 
-        self.cli = CLI(subscription_manager, github_client, report_generator)
+        self.command_handler = CommandHandler(subscription_manager, github_client, report_generator)
        
         self.notifier = Notifier(
             email_host="smtp.gmail.com",
@@ -34,7 +31,7 @@ class GitHubSentinel:
 
     def scheduler_task(self):
         """定时任务在后台运行"""
-        schedule.every().day.at("09:00").do(self.cli.daily_progress_and_report)
+        schedule.every().day.at("09:00").do(self.command_handler.daily_progress_and_report)
         while True:
             try:
                 # 检查并运行所有到期的任务
@@ -49,11 +46,11 @@ class GitHubSentinel:
             # 这是 schedule 库推荐的标准模式
             time.sleep(1)
 
-    def interactive_cli(self):
-        self.cli.show_help();
+    def interactive_command(self):
+        self.command_handler.show_help();
         while True:
             command = input("Enter a command: ").strip().lower()
-            if not self.cli.handle_command(command):
+            if not self.command_handler.handle_command(command):
                 break
 
 def main():
@@ -68,7 +65,7 @@ def main():
         scheduler_thread.start()
         
         # 启动交互式命令行工具
-        sentinel.interactive_cli()
+        sentinel.interactive_command()
     except Exception as e:
         print(f"Fatal error: {str(e)}")
         sys.exit(1)

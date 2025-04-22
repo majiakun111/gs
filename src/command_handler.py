@@ -1,6 +1,6 @@
 # cli.py
 
-class CLI:
+class CommandHandler:
     def __init__(self, subscription_manager, github_client, report_generator):
         self.subscription_manager = subscription_manager;
         self.github_client = github_client;
@@ -18,7 +18,7 @@ class CLI:
 
     def list_subscriptions(self):
         """列出所有订阅的仓库"""
-        subscriptions = self.subscription_manager.get_subscriptions()
+        subscriptions = self.subscription_manager.list_subscriptions()
         if not subscriptions:
             print("No subscriptions yet.")
         else:
@@ -28,7 +28,7 @@ class CLI:
 
     def process_repositories(self, action_callback):
         """遍历所有订阅仓库并执行指定操作（如只导出或导出+生成报告）"""
-        subscriptions = self.subscription_manager.get_subscriptions()
+        subscriptions = self.subscription_manager.list_subscriptions()
         if not subscriptions:
             print("No repositories subscribed yet.")
             return
@@ -48,14 +48,14 @@ class CLI:
     def export_daily_progress(self):
         """从所有订阅仓库获取更新"""
         self.process_repositories(
-            lambda owner, repo: self.github_client.export_daily_progress(owner, repo)
+            lambda owner, repo: self.github_client.export_progress(owner, repo)
         )
 
     def daily_progress_and_report(self):
         """从所有订阅仓库获取更新并生成报告"""
         def process(owner, repo):
-            markdown_file = self.github_client.export_daily_progress(owner, repo)
-            self.report_generator.generate_daily_report(markdown_file)
+            markdown_file = self.github_client.export_progress(owner, repo)
+            self.report_generator.generate_report(markdown_file)
 
         self.process_repositories(process)
         

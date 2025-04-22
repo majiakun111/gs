@@ -2,20 +2,13 @@ import json
 import os
 
 class SubscriptionManager:
-    def __init__(self):
-        # 使用项目根目录下的 data 目录存储订阅数据
-        current_script_path = os.path.abspath(__file__)
-        # 2. 获取脚本所在的目录 (e.g., .../your_project_root/src/subscriptions/)
-        script_dir = os.path.dirname(current_script_path)
-        # 3. 获取父目录 (即 src 目录) (e.g., .../your_project_root/src/)
-        parent_dir = os.path.dirname(script_dir)
-        # 4. 构建到父目录下 JSON 文件的完整路径
-        self.file_path = os.path.join(parent_dir, 'subscriptions.json')       
+    def __init__(self, subscriptions_file):        
+        self.subscriptions_file = subscriptions_file;
         self.subscriptions = self.load_subscriptions()
     
     def load_subscriptions(self):
-        if os.path.exists(self.file_path):
-            with open(self.file_path, "r") as file:
+        if os.path.exists(self.subscriptions_file):
+            with open(self.subscriptions_file, "r") as file:
                 return json.load(file)
                 
         # 如果文件不存在，创建一个空的订阅列表并保存
@@ -24,7 +17,7 @@ class SubscriptionManager:
         return self.subscriptions
     
     def save_subscriptions(self):
-        with open(self.file_path, "w") as file:
+        with open(self.subscriptions_file, "w") as file:
             json.dump(self.subscriptions, file, indent=4)
     
     def add_subscription(self, repo_url):
@@ -37,5 +30,5 @@ class SubscriptionManager:
             self.subscriptions.remove(repo_url)
             self.save_subscriptions()
     
-    def get_subscriptions(self):
+    def list_subscriptions(self):
         return self.subscriptions
