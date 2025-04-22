@@ -15,7 +15,7 @@ pip install -r requirements.txt
 ```
 
 ## 配置
-编辑 `config/settings.py` 配置文件，填入 GitHub API Token 和通知设置。
+编辑 `config.py` 配置文件，填入 GitHub API Token 和OpenAI Key设置。
 
 ## 使用
 运行以下命令启动：
