@@ -21,7 +21,7 @@ def export_progress_by_date_range(repo, days):
     report, report_file_path = report_generator.generate_report(raw_file_path)  # 生成并获取报告内容及文件路径
     # 转换为绝对路径
     report_file_path = os.path.abspath(report_file_path)
-    
+
     return report_file_path  #返回报告内容和报告文件路径
 
 demo = gr.Interface(
@@ -41,4 +41,4 @@ if __name__ == "__main__":
     #export_progress_by_date_range("axios/axios", days=5);
     demo.launch(share=True, server_name="0.0.0.0", server_port=10086, debug=True)
     # 可选带有用户认证的启动方式
-    # demo.launch(share=True, server_name="0.0.0.0", auth=("django", "1234"))
+    #demo.launch(share=True, server_name="0.0.0.0", auth=("django", "1234"))

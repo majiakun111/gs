@@ -211,8 +211,6 @@ cat > $PROJECT_DIR/requirements.txt <<EOF
 requests
 schedule
 smtplib
-slack_sdk
-apscheduler
 EOF
 
 # 8. 创建 .gitignore 文件
