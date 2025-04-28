@@ -1,4 +1,4 @@
 requests
+openai
+gradio
 schedule
-slack_sdk
-apscheduler

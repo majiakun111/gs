@@ -1,44 +1,59 @@
 import smtplib
+import markdown2
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from logger import LOG
 
 class Notifier:
-    def __init__(self, email_host, email_port, sender_email, sender_password):
-        self.email_host = email_host
-        self.email_port = email_port
-        self.sender_email = sender_email
-        self.sender_password = sender_password
-    
-    def send_email_notification(self, recipient_email, subject, body):
-        msg = MIMEMultipart()
-        msg['From'] = self.sender_email
-        msg['To'] = recipient_email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))
-        
-        try:
-            with smtplib.SMTP_SSL(self.email_host, self.email_port) as server:
-                server.login(self.sender_email, self.sender_password)
-                server.sendmail(self.sender_email, recipient_email, msg.as_string())
-            print("Email sent successfully")
-        except Exception as e:
-            print(f"Failed to send email: {e}")
-    
-    def send_slack_notification(self, slack_webhook_url, message):
-        import requests
-        payload = {"text": message}
-        response = requests.post(slack_webhook_url, json=payload)
-        if response.status_code == 200:
-            print("Slack notification sent successfully")
-        else:
-            print(f"Failed to send Slack notification: {response.status_code}")
+    def __init__(self, email):
+        self.email = email
 
-# 示例用法
-if __name__ == "__main__":
-    notifier = Notifier(
-        email_host="smtp.gmail.com", 
-        email_port=465, 
-        sender_email="your_email@gmail.com", 
-        sender_password="your_email_password"
-    )
-    notifier.send_email_notification("recipient@example.com", "Test Subject", "This is a test email.")
+    def notify(self, repo, report):
+        if self.email:
+            self.send_email(repo, report)
+        else:
+            LOG.warning("邮件设置未配置正确，无法发送通知")
+    
+    def send_email(self, repo, report):
+        LOG.info("准备发送邮件")
+        msg = MIMEMultipart()
+        msg['From'] = self.email['from']
+        msg['To'] = self.email['to']
+        msg['Subject'] = f"[GitHubSentinel]{repo} 进展简报"
+        
+        # 将Markdown内容转换为HTML
+        html_report = markdown2.markdown(report)
+
+        msg.attach(MIMEText(html_report, 'html'))
+
+        try:
+            with smtplib.SMTP_SSL(self.email['smtp_server'], self.email['smtp_port']) as server:
+                LOG.debug("登录SMTP服务器")
+                server.login(msg['From'], self.email['password'])
+                server.sendmail(msg['From'], msg['To'], msg.as_string())
+                LOG.info("邮件发送成功！")
+        except Exception as e:
+            LOG.error(f"发送邮件失败：{str(e)}")
+
+if __name__ == '__main__':
+    from config import Config
+    config = Config()
+    notifier = Notifier(config.email)
+
+    test_repo = "axios/axios"
+    test_report = """
+# axios/axios 项目进展
+
+## 时间周期：2024-08-24
+
+## 新增功能
+- Assistants API 代码与文档
+
+## 主要改进
+- 适配 LangChain 新版本
+
+## 修复问题
+- 关闭了一些未解决的问题。
+
+"""
+    notifier.notify(test_repo, test_report)

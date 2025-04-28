@@ -1,0 +1,12 @@
+{
+    "email":  {
+        "smtp_server": "smtp.sina.cn",
+        "smtp_port": 465,
+        "from": "majiakun111@sina.cn",
+        "password": "",
+        "to": "1143569868@qq.com"
+    },
+    "subscriptions_file": "subscriptions.json",
+    "github_progress_frequency_days": 1,
+    "github_progress_execution_time":"08:00"
+}
