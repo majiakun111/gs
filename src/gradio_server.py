@@ -10,7 +10,7 @@ import os
 # 创建各个组件的实例
 config = Config()
 github_client = GitHubClient(config.github_token)
-llm = LLM(config.openai_api_key)
+llm = LLM(config.llm)
 report_generator = ReportGenerator(llm)
 subscription_manager = SubscriptionManager(config.subscriptions_file)
 

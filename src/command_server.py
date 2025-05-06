@@ -3,6 +3,7 @@ import sys
 import threading
 import time
 import schedule
+
 from subscription_manager import SubscriptionManager
 from config import Config
 from github_client import GitHubClient
@@ -16,7 +17,7 @@ class GitHubSentinel:
     def __init__(self):
         config = Config();
         github_client = GitHubClient(token=config.github_token)
-        llm = LLM(config.openai_api_key)
+        llm = LLM(config.llm)
         report_generator = ReportGenerator(llm)
         subscription_manager = SubscriptionManager(config.subscriptions_file)
         self.command_handler = CommandHandler(subscription_manager, github_client, report_generator)
