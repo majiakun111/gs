@@ -55,18 +55,16 @@ class LLM:
     def generate_report_ollama(self, messages):
         LOG.info("使用 Ollama 托管模型服务开始生成报告。")
         try:
-            # payload = {
-            #     "model": self.config["model_name"], 
-            #     "messages": messages,
-            #     "stream": False
-            # }
             payload = {
-                        "model": "llama3.1:latest",
-                        "messages": [{"role": "user", "content": "What is the capital of France?"}]
+                "model": self.config["model_name"], 
+                "messages": messages,
+                "stream": False
             }
-            
-            response = requests.post(self.config["api_url"], json=payload)
-            LOG.debug("Ollama response: {}", response)
+
+            headers = {"Content-Type": "application/json"}
+
+            response = requests.post(self.config["api_url"], headers=headers, json=payload)
+            LOG.debug("Ollama response: {}", response.text)
 
             response_data = response.json()
 
